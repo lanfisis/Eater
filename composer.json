@@ -1,19 +1,20 @@
 {
     "name": "jacquesbh/eater",
-    "description": "A simple PHP class for eat everything",
+    "description": "A simple PHP class to eat everything",
     "version": "2.0",
     "authors": [
         {
             "name": "Jacques Bodin-Hullin",
-            "email": "jacques@bodin-hullin.net",
-            "homepage": "http://jacquesbodinhullin.net"
+            "email": "j.bodinhullin@monsieurbiz.com",
+            "homepage": "https://monsieurbiz.com"
         }
     ],
     "autoload": {
-        "psr-0": {"Jacquesbh": "lib/"}
+        "psr-4": {"Jacquesbh\\Eater\\": "src/"}
     },
     "require": {
-        "php": ">=5.4"
+        "php": ">=7.4",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpmd/phpmd": "^2.10"

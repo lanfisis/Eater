@@ -1,4 +1,5 @@
 <?php
+
 /*
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,41 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Jacques Bodin-Hullin <jacques@bodin-hullin.net>
- * @github http://github.com/jacquesbh/Eater
+ * @author Jacques Bodin-Hullin <j.bodinhullin@monsieurbiz.com>
+ * @github https://github.com/jacquesbh/Eater
  */
 
-/**
- * @namespace
- */
 namespace Jacquesbh\Eater;
 
-/**
- * @use
- */
-use Jacquesbh\Eater\InvalidArgumentException;
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
+use JsonSerializable;
 
-/**
- * Eater class
- */
-class Eater
-    implements \ArrayAccess, \IteratorAggregate, \JsonSerializable, \Countable
+class Eater implements ArrayAccess, IteratorAggregate, JsonSerializable, Countable
 {
+    protected array $data = [];
 
-    /**
-     * Data
-     *
-     * @access protected
-     * @var array
-     */
-    protected $_data = [];
-
-    /**
-     * Constructor :)
-     *
-     * @access public
-     * @return void
-     */
     public function __construct()
     {
         if (func_num_args()) {
@@ -55,18 +37,19 @@ class Eater
                 $this->addData($data);
             }
         }
-
         call_user_func_array([$this, '_construct'], func_get_args());
     }
 
     /**
      * Secondary constructor
-     * <p>Specialy for override :)</p>
+     * <p>Specially for override :)</p>
      *
      * @access protected
      * @return void
+     *
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
      */
-    protected function _construct()
+    protected function _construct(): void
     {
     }
 
@@ -74,10 +57,13 @@ class Eater
      * Add data
      *
      * @param array $data
-     * @access public
+     * @param bool $recursive
+     *
      * @return Eater
+     *
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
-    public function addData($data, $recursive = false)
+    public function addData(array $data, bool $recursive = false): self
     {
         if ($data === null || (!is_array($data) && !($data instanceof Eater))) {
             return $this;
@@ -94,20 +80,24 @@ class Eater
     /**
      * Set data
      *
-     * @param mixed $name
-     * @param mixed $value
-     * @access public
+     * @param string|array|null $name
+     * @param mixed|null $value
+     * @param bool $recursive
+     *
      * @return Eater
+     *
+     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @SuppressWarnings(PHPMD.BooleanArgumentFlag)
      */
-    public function setData($name = null, $value = null, $recursive = false)
+    public function setData($name = null, $value = null, bool $recursive = false): self
     {
         if (is_array($name) || $name === null) {
-            $this->_data = [];
+            $this->data = [];
             if (!empty($name)) {
                 $this->addData($name, $recursive);
             }
         } else {
-            $this->_data[$this->format($name)] = $value;
+            $this->data[$this->format($name)] = $value;
         }
         return $this;
     }
@@ -117,18 +107,19 @@ class Eater
      *
      * @param string $name
      * @param string $field
+     *
      * @access public
      * @return mixed
      */
     public function getData($name = null, $field = null)
     {
         if ($name === null) {
-            return $this->_data;
-        } elseif (array_key_exists($name = $this->format($name), $this->_data)) {
+            return $this->data;
+        } elseif (array_key_exists($name = $this->format($name), $this->data)) {
             if ($field !== null) {
-                return isset($this->_data[$name][$field]) ? $this->_data[$name][$field] : null;
+                return isset($this->data[$name][$field]) ? $this->data[$name][$field] : null;
             }
-            return $this->_data[$name];
+            return $this->data[$name];
         }
         return null;
     }
@@ -137,29 +128,31 @@ class Eater
      * Data exists?
      *
      * @param string $name
+     *
      * @access public
      * @return bool
      */
     public function hasData($name = null)
     {
         return $name === null
-            ? !empty($this->_data)
-            : array_key_exists($this->format($name), $this->_data);
+            ? !empty($this->data)
+            : array_key_exists($this->format($name), $this->data);
     }
 
     /**
      * Unset data
      *
      * @param string $name
+     *
      * @access public
      * @return Eater
      */
     public function unsetData($name = null)
     {
         if ($name === null) {
-            $this->_data = [];
-        } elseif (array_key_exists($name = $this->format($name), $this->_data)) {
-            unset($this->_data[$name]);
+            $this->data = [];
+        } elseif (array_key_exists($name = $this->format($name), $this->data)) {
+            unset($this->data[$name]);
         }
         return $this;
     }
@@ -168,18 +161,20 @@ class Eater
      * Returns if data offset exist
      *
      * @param mixed $offset
+     *
      * @access public
      * @return bool
      */
     public function offsetExists($offset)
     {
-        return array_key_exists($this->format($offset), $this->_data);
+        return array_key_exists($this->format($offset), $this->data);
     }
 
     /**
      * Returns data
      *
      * @param mixed $offset
+     *
      * @access public
      * @return mixed
      */
@@ -193,6 +188,7 @@ class Eater
      *
      * @param mixed $offset
      * @param mixed $value
+     *
      * @access public
      * @return void
      */
@@ -205,6 +201,7 @@ class Eater
      * Unset data
      *
      * @param mixed $offset
+     *
      * @access public
      * @return void
      */
@@ -217,6 +214,7 @@ class Eater
      * Format a string for storage
      *
      * @param string $str
+     *
      * @access public
      * @return string
      */
@@ -229,6 +227,7 @@ class Eater
      * Merge an other Eater (or array)
      *
      * @param Eater|array $eater
+     *
      * @access public
      * @return Eater
      */
@@ -237,10 +236,12 @@ class Eater
         if (!$eater instanceof Eater && !is_array($eater)) {
             throw new InvalidArgumentException('Only array or Eater are expected for merge.');
         }
-        return $this->setData(array_merge_recursive(
-            $this->getData(),
-            ($eater instanceof Eater) ? $eater->getData() : $eater
-        ));
+        return $this->setData(
+            array_merge_recursive(
+                $this->getData(),
+                ($eater instanceof Eater) ? $eater->getData() : $eater
+            )
+        );
     }
 
     /**
@@ -251,7 +252,7 @@ class Eater
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->_data);
+        return new ArrayIterator($this->data);
     }
 
     /**
@@ -263,7 +264,7 @@ class Eater
      */
     public function count()
     {
-        return count($this->_data);
+        return count($this->data);
     }
 
     /**
@@ -271,6 +272,7 @@ class Eater
      *
      * @param string $name Method name
      * @param array $arguments Method arguments
+     *
      * @access public
      * @return mixed
      */
@@ -280,21 +282,17 @@ class Eater
         switch ($prefix) {
             case 'set':
                 return $this->setData(substr($name, 3), !isset($arguments[0]) ? null : $arguments[0]);
-                break;
             case 'get':
                 $field = isset($arguments[0]) ? $arguments[0] : null;
                 return $this->getData(substr($name, 3), $field);
-                break;
             case 'has':
                 return $this->hasData(substr($name, 3));
-                break;
             case 'uns':
                 $begin = 3;
                 if (substr($name, 0, 5) == 'unset') {
                     $begin = 5;
                 }
                 return $this->unsetData(substr($name, $begin));
-                break;
         }
     }
 
@@ -303,6 +301,7 @@ class Eater
      *
      * @param string $name
      * @param mixed $value
+     *
      * @access public
      * @return void
      */
@@ -315,6 +314,7 @@ class Eater
      * Magic GET
      *
      * @param string $name
+     *
      * @access public
      * @return mixed
      */
@@ -327,6 +327,7 @@ class Eater
      * Magic ISSET
      *
      * @param string $name
+     *
      * @access public
      * @return mixed
      */
@@ -352,21 +353,19 @@ class Eater
      * @access public
      * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
-        return $this->_data;
+        return $this->data;
     }
 
     /**
      * Magic SLEEP
      *
      * @access public
-     * @return string
+     * @return array
      */
-    public function __sleep()
+    public function __sleep(): array
     {
-        return ['_data'];
+        return ['data'];
     }
-
-
 }
